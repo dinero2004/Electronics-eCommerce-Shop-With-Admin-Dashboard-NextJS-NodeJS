@@ -1,88 +1,96 @@
-"use client"
+"use client";
+
 import { useWishlistStore } from "@/app/_zustand/wishlistStore";
 import WishItem from "@/components/WishItem";
 import apiClient from "@/lib/api";
-import { nanoid } from "nanoid";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { useEffect } from "react";
 
 export const WishlistModule = () => {
   const { data: session, status } = useSession();
   const { wishlist, setWishlist } = useWishlistStore();
 
-  const getWishlistByUserId = async (id: string) => {
-    const response = await apiClient.get(`/api/wishlist/${id}`, {
-      cache: "no-store",
-    });
-    const wishlist = await response.json();
-
-    const productArray: {
-      id: string;
-      title: string;
-      price: number;
-      image: string;
-      slug: string
-      stockAvailabillity: number;
-    }[] = [];
-
-    wishlist.map((item: any) => productArray.push({ id: item?.product?.id, title: item?.product?.title, price: item?.product?.price, image: item?.product?.mainImage, slug: item?.product?.slug, stockAvailabillity: item?.product?.inStock }));
-
-    setWishlist(productArray);
-  };
-
-  const getUserByEmail = async () => {
-    if (session?.user?.email) {
-      apiClient.get(`/api/users/email/${session?.user?.email}`, {
-        cache: "no-store",
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          getWishlistByUserId(data?.id);
-        });
-    }
-  };
-
   useEffect(() => {
-    getUserByEmail();
-  }, [session?.user?.email, wishlist.length]);
-  return (
-    <>
+    if (!session?.user?.id) {
+      setWishlist([]);
+      return;
+    }
 
-      {wishlist && wishlist.length === 0 ? (
-        <h3 className="text-center text-4xl py-10 text-black max-lg:text-3xl max-sm:text-2xl max-sm:pt-5 max-[400px]:text-xl">
-          No items found in the wishlist
-        </h3>
-      ) : (
-        <div className="max-w-screen-2xl mx-auto">
-          <div className="overflow-x-auto">
-            <table className="table text-center">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th className="text-accent-content">Image</th>
-                  <th className="text-accent-content">Name</th>
-                  <th className="text-accent-content">Stock Status</th>
-                  <th className="text-accent-content">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {wishlist &&
-                  wishlist?.map((item) => (
-                    <WishItem
-                      id={item?.id}
-                      title={item?.title}
-                      price={item?.price}
-                      image={item?.image}
-                      slug={item?.slug}
-                      stockAvailabillity={item?.stockAvailabillity}
-                      key={nanoid()}
-                    />
-                  ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-    </>
-  )
-}
+    let cancelled = false;
+
+    apiClient
+      .get(`/api/wishlist/${session.user.id}`, { cache: "no-store" })
+      .then((response) => response.json())
+      .then((items) => {
+        if (cancelled || !Array.isArray(items)) return;
+
+        setWishlist(
+          items.map((item: WishListItem) => ({
+            id: item.product.id,
+            title: item.product.title,
+            price: item.product.price,
+            image: item.product.mainImage,
+            slug: item.product.slug,
+            stockAvailabillity: item.product.inStock,
+          }))
+        );
+      })
+      .catch(() => {
+        if (!cancelled) setWishlist([]);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [session?.user?.id, setWishlist]);
+
+  if (status === "loading") {
+    return <p className="py-10 text-center text-xl">Loading your wishlist…</p>;
+  }
+
+  if (!session) {
+    return (
+      <div className="py-12 text-center">
+        <p className="mb-5 text-2xl">Sign in to create and view your wishlist.</p>
+        <Link href="/login" className="inline-block bg-blue-600 px-8 py-3 font-bold text-white hover:bg-blue-700">
+          Sign in
+        </Link>
+      </div>
+    );
+  }
+
+  if (wishlist.length === 0) {
+    return (
+      <div className="py-12 text-center">
+        <p className="mb-5 text-2xl">Your wishlist is empty.</p>
+        <Link href="/shop" className="inline-block bg-blue-600 px-8 py-3 font-bold text-white hover:bg-blue-700">
+          Browse products
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto max-w-screen-2xl">
+      <div className="overflow-x-auto">
+        <table className="table text-center">
+          <thead>
+            <tr>
+              <th></th>
+              <th className="text-accent-content">Image</th>
+              <th className="text-accent-content">Name</th>
+              <th className="text-accent-content">Stock Status</th>
+              <th className="text-accent-content">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {wishlist.map((item) => (
+              <WishItem {...item} key={item.id} />
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};

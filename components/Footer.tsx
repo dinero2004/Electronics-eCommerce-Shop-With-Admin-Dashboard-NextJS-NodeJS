@@ -9,7 +9,7 @@
 // *********************
 
 import { navigation } from "@/lib/utils";
-import Image from "next/image";
+import Link from "next/link";
 import React from "react";
 
 const Footer = () => {
@@ -21,13 +21,9 @@ const Footer = () => {
         </h2>
         <div className="mx-auto max-w-screen-2xl px-6 lg:px-8 pt-24 pb-14">
           <div className="xl:grid xl:grid-cols-3 xl:gap-8">
-            <Image
-              src="/logo v1.png"
-              alt="Singitronic logo"
-              width={250}
-              height={250}
-              className="h-auto w-auto"
-            />
+            <Link href="/" className="text-3xl font-black tracking-tight text-slate-950" aria-label="My First Shop home">
+              MY FIRST <span className="text-blue-600">SHOP</span>
+            </Link>
             <div className="mt-16 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
               <div className="md:grid md:grid-cols-2 md:gap-8">
                 <div>

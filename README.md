@@ -1,4 +1,27 @@
-<h1>Electronics eCommerce Shop With Admin Dashboard in Next.js and Node.js</h1>
+<h1>My First Shop</h1>
+
+My First Shop is a full-stack electronics storefront template with a customer-facing catalog, search and filters, cart, checkout, accounts, wishlists, notifications, and an admin dashboard for products, categories, merchants, users, and orders.
+
+This fork is based on the open-source Singitronic project and keeps its MIT license. The storefront branding and local setup have been adapted to make it a practical first-shop starter.
+
+## Local development
+
+Requirements: Node.js 20 or newer, npm, and MySQL.
+
+1. Copy `.env.example` to `.env` and `server/.env.example` to `server/.env`.
+2. Update both `DATABASE_URL` values with your local MySQL user and password.
+3. Create an empty MySQL database named `my_first_online_shop`.
+4. Install packages with `npm install` in this folder and in `server/`.
+5. From `server/`, run `npx prisma db push` and `node utills/insertDemoData.js`.
+6. Optionally create an admin with `node createAdminUser.js you@example.com your-password`.
+7. Start the API with `npm start` from `server/`.
+8. Start the storefront with `npm run dev` from the project root.
+
+Open [http://localhost:3000](http://localhost:3000). The API health endpoint is [http://localhost:3001/health](http://localhost:3001/health).
+
+> Change all example credentials and secrets before deploying this project publicly.
+
+<h2>Original project: Electronics eCommerce Shop With Admin Dashboard in Next.js and Node.js</h2>
 
 <p><b>Electronics eCommerce shop with admin dashboard in Next.js and Node.js</b> is a <b>free eCommerce store</b> developed using Next.js, Node.js and MySQL. The application is completely built from scratch(custom design) and completely responsive.
 Singitronic is a modern online shop that specializes in selling all types of electronic products. The goal of the project is to create a modern web application <b>by following key stages in software engineering</b>. 

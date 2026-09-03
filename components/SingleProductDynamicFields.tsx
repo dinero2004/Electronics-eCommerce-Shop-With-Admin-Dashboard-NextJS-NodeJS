@@ -13,6 +13,7 @@ import React, { useState } from "react";
 import QuantityInput from "./QuantityInput";
 import AddToCartSingleProductBtn from "./AddToCartSingleProductBtn";
 import BuyNowSingleProductBtn from "./BuyNowSingleProductBtn";
+import WishlistButton from "./WishlistButton";
 
 const SingleProductDynamicFields = ({ product }: { product: Product }) => {
   const [quantityCount, setQuantityCount] = useState<number>(1);
@@ -34,6 +35,7 @@ const SingleProductDynamicFields = ({ product }: { product: Product }) => {
           />
         </div>
       )}
+      <WishlistButton product={product} />
     </>
   );
 };
