@@ -47,7 +47,7 @@ const WishlistButton = ({ product }: { product: Product }) => {
     <button
       type="button"
       onClick={saveProduct}
-      className="flex items-center justify-center gap-2 border border-blue-600 px-6 py-3 font-bold text-blue-600 hover:bg-blue-50"
+      className="flex items-center justify-center gap-2 rounded-full border border-brand-sage px-6 py-3 font-semibold text-brand-pine hover:bg-brand-mist"
     >
       <FaHeart />
       {isSaved ? "SAVED" : "ADD TO WISHLIST"}
@@ -56,4 +56,3 @@ const WishlistButton = ({ product }: { product: Product }) => {
 };
 
 export default WishlistButton;
-

@@ -53,7 +53,7 @@ export const WishlistModule = () => {
     return (
       <div className="py-12 text-center">
         <p className="mb-5 text-2xl">Sign in to create and view your wishlist.</p>
-        <Link href="/login" className="inline-block bg-blue-600 px-8 py-3 font-bold text-white hover:bg-blue-700">
+        <Link href="/login" className="inline-block bg-brand-pine px-8 py-3 font-bold text-white hover:bg-brand-ink">
           Sign in
         </Link>
       </div>
@@ -64,7 +64,7 @@ export const WishlistModule = () => {
     return (
       <div className="py-12 text-center">
         <p className="mb-5 text-2xl">Your wishlist is empty.</p>
-        <Link href="/shop" className="inline-block bg-blue-600 px-8 py-3 font-bold text-white hover:bg-blue-700">
+        <Link href="/shop" className="inline-block bg-brand-pine px-8 py-3 font-bold text-white hover:bg-brand-ink">
           Browse products
         </Link>
       </div>

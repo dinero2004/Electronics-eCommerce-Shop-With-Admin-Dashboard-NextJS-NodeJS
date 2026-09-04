@@ -13,19 +13,19 @@ import React from "react";
 
 const IntroducingSection = () => {
   return (
-    <div className="py-20 pt-24 bg-gradient-to-l from-white to-[#A5CCD1] max-lg:pt-32 max-lg:pb-20">
+    <div className="py-20 pt-24 bg-gradient-to-l from-white to-brand-mist max-lg:pt-32 max-lg:pb-20">
       <div className="text-center flex flex-col gap-y-5 items-center">
-        <h2 className="text-white text-8xl font-extrabold text-center mb-2 max-md:text-6xl max-[480px]:text-4xl">
-          MEET <span className="text-black">MY FIRST</span> <span className="text-[#bcd4de]">SHOP</span>
+        <h2 className="text-brand-pine text-8xl font-extrabold text-center mb-2 max-md:text-6xl max-[480px]:text-4xl">
+          MEET <span className="text-brand-ink">MY FIRST</span> <span className="text-brand-sage">SHOP</span>
         </h2>
         <div>
-          <p className="text-white text-center text-2xl font-semibold max-md:text-xl max-[480px]:text-base">
+          <p className="text-slate-600 text-center text-2xl font-semibold max-md:text-xl max-[480px]:text-base">
             A friendly online store template, ready for your products.
           </p>
-          <p className="text-white text-center text-2xl font-semibold max-md:text-xl max-[480px]:text-base">
+          <p className="text-slate-600 text-center text-2xl font-semibold max-md:text-xl max-[480px]:text-base">
             Manage products, customers, and orders from one dashboard.
           </p>
-          <Link href="/shop" className="block text-[#A5CCD1] bg-white font-bold px-12 py-3 text-xl hover:bg-gray-100 w-96 mt-2  max-md:text-lg max-md:w-72 max-[480px]:w-60 mx-auto">
+          <Link href="/shop" className="block text-white bg-brand-pine font-bold px-12 py-3 text-xl hover:bg-brand-ink w-96 mt-2 max-md:text-lg max-md:w-72 max-[480px]:w-60 mx-auto">
             SHOP NOW
           </Link>
         </div>

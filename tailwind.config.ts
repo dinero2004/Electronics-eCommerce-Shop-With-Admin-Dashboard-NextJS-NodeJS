@@ -9,7 +9,15 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        'custom-yellow':'#FED700',
+        'custom-yellow':'#D5A443',
+        brand: {
+          ink: '#17201D',
+          pine: '#49675F',
+          sage: '#A9BBB5',
+          mist: '#E8EFEC',
+          cream: '#F7F5EF',
+          sand: '#DDD5C7',
+        },
       }
     },
   },  

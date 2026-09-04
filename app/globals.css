@@ -2,23 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+    background-color: #F7F5EF;
+    color: #17201D;
+}
+
+::selection {
+    background-color: #A9BBB5;
+    color: #17201D;
+}
+
 .range {
-    --range-shdw: #8C7355;
+    --range-shdw: #49675F;
 }
 
 .checkbox:checked, .checkbox[checked="true"], .checkbox[aria-checked="true"] {
     background-repeat: no-repeat;
     animation: checkmark var(--animation-input, 0.2s) ease-out;
-    background-color: #8C7355;
-    background-image: linear-gradient(-45deg, transparent 65%, #8C7355 65.99%),
-      linear-gradient(45deg, transparent 75%, #8C7355 75.99%),
-      linear-gradient(-45deg, #8C7355 40%, transparent 40.99%),
+    background-color: #49675F;
+    background-image: linear-gradient(-45deg, transparent 65%, #49675F 65.99%),
+      linear-gradient(45deg, transparent 75%, #49675F 75.99%),
+      linear-gradient(-45deg, #49675F 40%, transparent 40.99%),
       linear-gradient(
         45deg,
-        #8C7355 30%,
+        #49675F 30%,
         white 30.99%,
         white 40%,
         transparent 40.99%
       ),
-      linear-gradient(-45deg, white 50%, #8C7355 50.99%);
+      linear-gradient(-45deg, white 50%, #49675F 50.99%);
 }

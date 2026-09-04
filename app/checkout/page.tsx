@@ -436,18 +436,18 @@ const CheckoutPage = () => {
 
             {/* Payment Notice */}
             <section className="mt-10">
-              <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+              <div className="rounded-md border border-brand-sage bg-brand-mist p-4">
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                    <svg className="h-5 w-5 text-brand-pine" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                     </svg>
                   </div>
                   <div className="ml-3">
-                    <h3 className="text-sm font-medium text-blue-800">
+                    <h3 className="text-sm font-medium text-brand-ink">
                       Secure payment
                     </h3>
-                    <div className="mt-2 text-sm text-blue-700">
+                    <div className="mt-2 text-sm text-brand-pine">
                       <p>Continue to Stripe Sandbox for TWINT, Visa, Mastercard, Apple Pay, or Google Pay. Test payments never create a real charge.</p>
                     </div>
                   </div>
@@ -657,7 +657,7 @@ const CheckoutPage = () => {
                 type="button"
                 onClick={makePurchase}
                 disabled={isSubmitting || sessionStatus !== "authenticated"}
-                className="w-full rounded-md border border-transparent bg-blue-500 px-20 py-2 text-lg font-medium text-white shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 focus:ring-offset-gray-50 sm:order-last disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="w-full rounded-md border border-transparent bg-brand-pine px-20 py-2 text-lg font-medium text-white shadow-sm hover:bg-brand-ink focus:outline-none focus:ring-2 focus:ring-brand-sage focus:ring-offset-2 focus:ring-offset-gray-50 sm:order-last disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? "Opening secure payment..." : "Continue to secure payment"}
               </button>

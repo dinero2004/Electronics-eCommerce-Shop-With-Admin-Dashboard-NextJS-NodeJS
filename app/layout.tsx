@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Roboto } from "next/font/google";
 import "./globals.css";
 import { getServerSession } from "next-auth/next";
 import 'svgmap/dist/svgMap.min.css';
@@ -9,7 +9,7 @@ import Footer from "@/components/Footer";
 import Providers from "@/Providers";
 import SessionTimeoutWrapper from "@/components/SessionTimeoutWrapper";
 
-const inter = Inter({ subsets: ["latin"] });
+const roboto = Roboto({ subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
   title: {
@@ -27,7 +27,7 @@ export default async function RootLayout({
   const session = await getServerSession();
   return (
     <html lang="en" data-theme="light">
-      <body className={inter.className}>
+      <body className={roboto.className}>
         <SessionProvider session={session}>
           <SessionTimeoutWrapper />
           <Header />

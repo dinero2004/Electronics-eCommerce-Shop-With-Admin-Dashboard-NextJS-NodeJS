@@ -9,7 +9,7 @@ import { type FormEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { FiAlertCircle, FiCheck, FiEye, FiEyeOff, FiLoader, FiLock, FiMail } from "react-icons/fi";
 
-const inputClassName = "block w-full rounded-xl border-slate-300 bg-white py-3 pl-11 pr-4 text-slate-950 shadow-sm transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-blue-600";
+const inputClassName = "block w-full rounded-xl border-slate-300 bg-white py-3 pl-11 pr-4 text-slate-950 shadow-sm transition placeholder:text-slate-400 focus:border-brand-pine focus:ring-brand-pine";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -55,7 +55,7 @@ export default function RegisterPage() {
   if (sessionStatus === "loading") return <div className="min-h-[70vh] animate-pulse bg-slate-50" aria-label="Loading registration" />;
 
   return (
-    <AuthShell eyebrow="Get started" title="Create your shop account" description="Register once, then test the complete product-to-payment journey." footer={<p>Already have an account? <Link href="/login" className="font-bold text-blue-700 hover:text-blue-800">Sign in</Link></p>}>
+    <AuthShell eyebrow="Get started" title="Create your shop account" description="Register once, then test the complete product-to-payment journey." footer={<p>Already have an account? <Link href="/login" className="font-bold text-brand-pine hover:text-brand-ink">Sign in</Link></p>}>
       {error && <div className="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert"><FiAlertCircle className="mt-0.5 shrink-0" aria-hidden="true" /><span>{error}</span></div>}
       <form className="space-y-5" onSubmit={handleSubmit}>
         <div>
@@ -74,8 +74,8 @@ export default function RegisterPage() {
           <label htmlFor="confirmPassword" className="block text-sm font-semibold text-slate-800">Confirm password</label>
           <div className="relative mt-2"><FiCheck className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true" /><input id="confirmPassword" name="confirmPassword" type={showPassword ? "text" : "password"} autoComplete="new-password" required minLength={8} className={inputClassName} /></div>
         </div>
-        <label className="flex cursor-pointer items-start gap-3 text-sm leading-6 text-slate-600"><input name="terms" type="checkbox" required className="mt-1 rounded border-slate-300 text-blue-700 focus:ring-blue-600" /><span>I accept the terms and privacy policy for this local shop template.</span></label>
-        <button type="submit" disabled={isSubmitting} className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70">
+        <label className="flex cursor-pointer items-start gap-3 text-sm leading-6 text-slate-600"><input name="terms" type="checkbox" required className="mt-1 rounded border-slate-300 text-brand-pine focus:ring-brand-pine" /><span>I accept the terms and privacy policy for this local shop template.</span></label>
+        <button type="submit" disabled={isSubmitting} className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-pine px-5 py-3.5 text-sm font-bold text-white shadow-lg transition hover:bg-brand-ink focus:outline-none focus:ring-2 focus:ring-brand-sage focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70">
           {isSubmitting && <FiLoader className="animate-spin" aria-hidden="true" />}{isSubmitting ? "Creating account…" : "Create account"}
         </button>
       </form>

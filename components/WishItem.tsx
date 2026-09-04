@@ -50,13 +50,13 @@ const WishItem = ({
         />
       </td>
       <td>
-        <Link href={`/product/${slug}`} className="font-semibold hover:text-blue-600">
+        <Link href={`/product/${slug}`} className="font-semibold hover:text-brand-pine">
           {title}
         </Link>
       </td>
       <td>{stockAvailabillity ? "In stock" : "Out of stock"}</td>
       <td>
-        <Link href={`/product/${slug}`} className="inline-block bg-blue-600 px-4 py-2 font-bold text-white hover:bg-blue-700">
+        <Link href={`/product/${slug}`} className="inline-block bg-brand-pine px-4 py-2 font-bold text-white hover:bg-brand-ink">
           View product
         </Link>
       </td>
@@ -65,4 +65,3 @@ const WishItem = ({
 };
 
 export default WishItem;
-

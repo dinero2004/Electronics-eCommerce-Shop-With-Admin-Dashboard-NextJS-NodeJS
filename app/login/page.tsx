@@ -9,7 +9,7 @@ import { type FormEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { FiAlertCircle, FiEye, FiEyeOff, FiLoader, FiLock, FiMail } from "react-icons/fi";
 
-const inputClassName = "block w-full rounded-xl border-slate-300 bg-white py-3 pl-11 pr-4 text-slate-950 shadow-sm transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-blue-600";
+const inputClassName = "block w-full rounded-xl border-slate-300 bg-white py-3 pl-11 pr-4 text-slate-950 shadow-sm transition placeholder:text-slate-400 focus:border-brand-pine focus:ring-brand-pine";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -47,7 +47,7 @@ export default function LoginPage() {
   if (sessionStatus === "loading") return <div className="min-h-[70vh] animate-pulse bg-slate-50" aria-label="Loading sign in" />;
 
   return (
-    <AuthShell eyebrow="Welcome back" title="Sign in to your account" description="Access your cart, orders and secure Stripe sandbox checkout." footer={<p>New to My First Shop? <Link href="/register" className="font-bold text-blue-700 hover:text-blue-800">Create an account</Link></p>}>
+    <AuthShell eyebrow="Welcome back" title="Sign in to your account" description="Access your cart, orders and secure Stripe sandbox checkout." footer={<p>New to My First Shop? <Link href="/register" className="font-bold text-brand-pine hover:text-brand-ink">Create an account</Link></p>}>
       {searchParams.get("registered") === "true" && <div className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800" role="status">Account created. You can sign in now.</div>}
       {error && <div className="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert"><FiAlertCircle className="mt-0.5 shrink-0" aria-hidden="true" /><span>{error}</span></div>}
       <form className="space-y-5" onSubmit={handleSubmit}>
@@ -63,7 +63,7 @@ export default function LoginPage() {
             <button type="button" onClick={() => setShowPassword((visible) => !visible)} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600" aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? <FiEyeOff aria-hidden="true" /> : <FiEye aria-hidden="true" />}</button>
           </div>
         </div>
-        <button type="submit" disabled={isSubmitting} className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70">
+        <button type="submit" disabled={isSubmitting} className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-pine px-5 py-3.5 text-sm font-bold text-white shadow-lg transition hover:bg-brand-ink focus:outline-none focus:ring-2 focus:ring-brand-sage focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70">
           {isSubmitting && <FiLoader className="animate-spin" aria-hidden="true" />}{isSubmitting ? "Signing in…" : "Sign in securely"}
         </button>
       </form>

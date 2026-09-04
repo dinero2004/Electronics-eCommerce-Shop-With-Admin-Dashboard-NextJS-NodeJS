@@ -70,7 +70,7 @@ export default function CheckoutSuccessPage() {
         </p>
         <Link
           href="/shop"
-          className="mt-8 inline-flex rounded-md bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+          className="mt-8 inline-flex rounded-md bg-brand-pine px-6 py-3 font-semibold text-white hover:bg-brand-ink focus:outline-none focus:ring-2 focus:ring-brand-sage focus:ring-offset-2"
         >
           Continue shopping
         </Link>

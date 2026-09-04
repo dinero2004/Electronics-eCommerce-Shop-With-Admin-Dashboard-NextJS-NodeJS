@@ -35,7 +35,7 @@ const SearchInput = () => {
         placeholder="Type here"
         className="bg-gray-50 input input-bordered w-[70%] rounded-r-none outline-none focus:outline-none max-sm:w-full"
       />
-      <button type="submit" className="btn bg-[#92b9bd] text-white rounded-l-none rounded-r-xl hover:bg-[#79aaaf]">
+      <button type="submit" className="btn rounded-l-none rounded-r-xl border-brand-pine bg-brand-pine text-white hover:border-brand-ink hover:bg-brand-ink">
         Search
       </button>
     </form>
