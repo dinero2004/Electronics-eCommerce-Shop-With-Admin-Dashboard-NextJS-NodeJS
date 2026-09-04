@@ -1,10 +1,12 @@
 const express = require("express");
 const path = require('path');
-// Load env from server/.env then fallback to project root .env
-require('dotenv').config({ path: path.join(__dirname, '.env') });
-require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
-const bcrypt = require('bcryptjs');
+// Local overrides load first; committed examples never contain real secrets.
+require('dotenv').config({ path: path.join(__dirname, '.env.local'), quiet: true });
+require('dotenv').config({ path: path.join(__dirname, '.env'), quiet: true });
+require('dotenv').config({ path: path.join(__dirname, '..', '.env.local'), quiet: true });
+require('dotenv').config({ path: path.join(__dirname, '..', '.env'), quiet: true });
 const fileUpload = require("express-fileupload");
+const helmet = require("helmet");
 const productsRouter = require("./routes/products");
 const productImagesRouter = require("./routes/productImages");
 const categoryRouter = require("./routes/category");
@@ -18,6 +20,8 @@ const wishlistRouter = require('./routes/wishlist');
 const notificationsRouter = require('./routes/notifications');
 const merchantRouter = require('./routes/merchant'); // Add this line
 const bulkUploadRouter = require('./routes/bulkUpload');
+const paymentsRouter = require('./routes/payments');
+const { handleWebhook } = require('./controllers/payments');
 var cors = require("cors");
 
 // Import logging middleware
@@ -48,6 +52,13 @@ const app = express();
 
 // Trust proxy for accurate IP addresses
 app.set('trust proxy', 1);
+app.disable('x-powered-by');
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  strictTransportSecurity: process.env.NODE_ENV === "production"
+    ? { maxAge: 31536000, includeSubDomains: true }
+    : false,
+}));
 
 // Add request ID to all requests
 app.use(addRequestId);
@@ -93,12 +104,26 @@ const corsOptions = {
   credentials: true, // Allow cookies and authorization headers
 };
 
+// Health probes must not consume the public API rate-limit budget.
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    rateLimiting: 'enabled',
+    requestId: req.reqId
+  });
+});
+
 // Apply general rate limiting to all routes
 app.use(generalLimiter);
 
-app.use(express.json());
 app.use(cors(corsOptions));
-app.use(fileUpload());
+
+// Stripe signature verification requires the unmodified request body.
+app.post('/api/payments/webhook', express.raw({ type: 'application/json', limit: '1mb' }), handleWebhook);
+
+app.use(express.json({ limit: '1mb' }));
+app.use(fileUpload({ limits: { fileSize: 5 * 1024 * 1024 }, abortOnLimit: true }));
 
 // Apply specific rate limiters to different route groups
 app.use("/api/users", userManagementLimiter);
@@ -131,16 +156,7 @@ app.use("/api/wishlist", wishlistRouter);
 app.use("/api/notifications", notificationsRouter);
 app.use("/api/merchants", merchantRouter); 
 app.use("/api/bulk-upload", bulkUploadRouter);
-
-// Health check endpoint (no rate limiting)
-app.get('/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'OK', 
-    timestamp: new Date().toISOString(),
-    rateLimiting: 'enabled',
-    requestId: req.reqId
-  });
-});
+app.use("/api/payments", paymentsRouter);
 
 // Rate limit info endpoint
 app.get('/rate-limit-info', (req, res) => {
@@ -171,8 +187,12 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log('Rate limiting and request logging enabled for all endpoints');
-  console.log('Logs are being written to server/logs/ directory');
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log('Rate limiting and request logging enabled for all endpoints');
+    console.log('Logs are being written to server/logs/ directory');
+  });
+}
+
+module.exports = app;

@@ -1,240 +1,85 @@
 "use client";
-import { CustomButton, SectionTitle } from "@/components";
-import { useSession } from "next-auth/react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 
-const RegisterPage = () => {
-  const [error, setError] = useState("");
+import AuthShell from "@/components/auth/AuthShell";
+import { isValidEmailAddressFormat } from "@/lib/utils";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { type FormEvent, useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { FiAlertCircle, FiCheck, FiEye, FiEyeOff, FiLoader, FiLock, FiMail } from "react-icons/fi";
+
+const inputClassName = "block w-full rounded-xl border-slate-300 bg-white py-3 pl-11 pr-4 text-slate-950 shadow-sm transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-blue-600";
+
+export default function RegisterPage() {
   const router = useRouter();
-  const { data: session, status: sessionStatus } = useSession();
+  const { status: sessionStatus } = useSession();
+  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // chechking if user has already registered redirect to home page
-    if (sessionStatus === "authenticated") {
-      router.replace("/");
-    }
-  }, [sessionStatus, router]);
+    if (sessionStatus === "authenticated") router.replace("/");
+  }, [router, sessionStatus]);
 
-  const isValidEmail = (email: string) => {
-    const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
-    return emailRegex.test(email);
-  };
-  
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    const email = e.target[2].value;
-    const password = e.target[3].value;
-    const confirmPassword = e.target[4].value;
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+    const form = new FormData(event.currentTarget);
+    const email = String(form.get("email") || "").trim().toLowerCase();
+    const password = String(form.get("password") || "");
+    const confirmPassword = String(form.get("confirmPassword") || "");
+    const acceptedTerms = form.get("terms") === "on";
+    if (!isValidEmailAddressFormat(email)) return setError("Enter a valid email address.");
+    if (password.length < 8) return setError("Choose a password with at least 8 characters.");
+    if (password !== confirmPassword) return setError("The passwords do not match.");
+    if (!acceptedTerms) return setError("Please accept the terms and privacy policy.");
 
-    if (!isValidEmail(email)) {
-      setError("Email is invalid");
-      toast.error("Email is invalid");
-      return;
-    }
-
-    if (!password || password.length < 8) {
-      setError("Password must be 8 characters long");
-      toast.error("Password must be 8 characters long");
-      return;
-    }
-
-    if (confirmPassword !== password) {
-      setError("Passwords are not equal");
-      toast.error("Passwords are not equal");
-      return;
-    }
-
+    setIsSubmitting(true);
     try {
-      // sending API request for registering user
-      const res = await fetch("/api/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setError("");
-        toast.success("Registration successful");
-        router.push("/login");
-      } else {
-        // Handle different types of errors
-        if (data.details && Array.isArray(data.details)) {
-          // Validation errors
-          const errorMessage = data.details.map((err: any) => err.message).join(", ");
-          setError(errorMessage);
-          toast.error(errorMessage);
-        } else if (data.error) {
-          // General errors
-          setError(data.error);
-          toast.error(data.error);
-        } else {
-          setError("Registration failed");
-          toast.error("Registration failed");
-        }
+      const response = await fetch("/api/register", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }) });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const detail = Array.isArray(result.details) ? result.details.map((item: { message?: string }) => item.message).filter(Boolean).join(", ") : result.error;
+        throw new Error(detail || "We could not create your account.");
       }
-    } catch (error) {
-      toast.error("Error, try again");
-      setError("Error, try again");
-      console.log(error);
+      toast.success("Account created");
+      router.push("/login?registered=true");
+    } catch (registrationError) {
+      setError(registrationError instanceof Error ? registrationError.message : "We could not create your account.");
+    } finally {
+      setIsSubmitting(false);
     }
-  };
-
-  if (sessionStatus === "loading") {
-    return <h1>Loading...</h1>;
   }
+
+  if (sessionStatus === "loading") return <div className="min-h-[70vh] animate-pulse bg-slate-50" aria-label="Loading registration" />;
+
   return (
-    <div className="bg-white">
-      <SectionTitle title="Register" path="Home | Register" />
-      <div className="flex min-h-full flex-1 flex-col justify-center py-12 sm:px-6 lg:px-8 bg-white">
-        <div className="flex justify-center flex-col items-center">
-          <h2 className="mt-6 text-center text-2xl leading-9 tracking-tight text-gray-900">
-            Sign up on our website
-          </h2>
+    <AuthShell eyebrow="Get started" title="Create your shop account" description="Register once, then test the complete product-to-payment journey." footer={<p>Already have an account? <Link href="/login" className="font-bold text-blue-700 hover:text-blue-800">Sign in</Link></p>}>
+      {error && <div className="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert"><FiAlertCircle className="mt-0.5 shrink-0" aria-hidden="true" /><span>{error}</span></div>}
+      <form className="space-y-5" onSubmit={handleSubmit}>
+        <div>
+          <label htmlFor="email" className="block text-sm font-semibold text-slate-800">Email address</label>
+          <div className="relative mt-2"><FiMail className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true" /><input id="email" name="email" type="email" autoComplete="email" placeholder="you@example.com" required className={inputClassName} /></div>
         </div>
-
-        <div className="mt-5 sm:mx-auto sm:w-full sm:max-w-[480px]">
-          <div className="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
-            <form className="space-y-6" onSubmit={handleSubmit}>
-              <div>
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-medium leading-6 text-gray-900"
-                >
-                  Name
-                </label>
-                <div className="mt-2">
-                  <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    required
-                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="lastname"
-                  className="block text-sm font-medium leading-6 text-gray-900"
-                >
-                  Lastname
-                </label>
-                <div className="mt-2">
-                  <input
-                    id="lastname"
-                    name="lastname"
-                    type="text"
-                    required
-                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium leading-6 text-gray-900"
-                >
-                  Email address
-                </label>
-                <div className="mt-2">
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium leading-6 text-gray-900"
-                >
-                  Password
-                </label>
-                <div className="mt-2">
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete="current-password"
-                    required
-                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="confirmpassword"
-                  className="block text-sm font-medium leading-6 text-gray-900"
-                >
-                  Confirm password
-                </label>
-                <div className="mt-2">
-                  <input
-                    id="confirmpassword"
-                    name="confirmpassword"
-                    type="password"
-                    autoComplete="current-password"
-                    required
-                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <input
-                    id="remember-me"
-                    name="remember-me"
-                    type="checkbox"
-                    className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
-                  />
-                  <label
-                    htmlFor="remember-me"
-                    className="ml-3 block text-sm leading-6 text-gray-900"
-                  >
-                    Accept our terms and privacy policy
-                  </label>
-                </div>
-              </div>
-
-              <div>
-                <CustomButton
-                  buttonType="submit"
-                  text="Sign up"
-                  paddingX={3}
-                  paddingY={1.5}
-                  customWidth="full"
-                  textSize="sm"
-                />
-
-                <p className="text-red-600 text-center text-[16px] my-4">
-                  {error && error}
-                </p>
-              </div>
-            </form>
+        <div>
+          <div className="flex items-center justify-between"><label htmlFor="password" className="block text-sm font-semibold text-slate-800">Password</label><span className="text-xs text-slate-500">Minimum 8 characters</span></div>
+          <div className="relative mt-2">
+            <FiLock className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+            <input id="password" name="password" type={showPassword ? "text" : "password"} autoComplete="new-password" required minLength={8} className={`${inputClassName} pr-12`} />
+            <button type="button" onClick={() => setShowPassword((visible) => !visible)} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600" aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? <FiEyeOff aria-hidden="true" /> : <FiEye aria-hidden="true" />}</button>
           </div>
         </div>
-      </div>
-    </div>
+        <div>
+          <label htmlFor="confirmPassword" className="block text-sm font-semibold text-slate-800">Confirm password</label>
+          <div className="relative mt-2"><FiCheck className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true" /><input id="confirmPassword" name="confirmPassword" type={showPassword ? "text" : "password"} autoComplete="new-password" required minLength={8} className={inputClassName} /></div>
+        </div>
+        <label className="flex cursor-pointer items-start gap-3 text-sm leading-6 text-slate-600"><input name="terms" type="checkbox" required className="mt-1 rounded border-slate-300 text-blue-700 focus:ring-blue-600" /><span>I accept the terms and privacy policy for this local shop template.</span></label>
+        <button type="submit" disabled={isSubmitting} className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-700/20 transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70">
+          {isSubmitting && <FiLoader className="animate-spin" aria-hidden="true" />}{isSubmitting ? "Creating account…" : "Create account"}
+        </button>
+      </form>
+      <p className="mt-4 text-center text-xs leading-5 text-slate-500">Stripe sandbox payments do not charge real money.</p>
+    </AuthShell>
   );
-};
-
-export default RegisterPage;
+}

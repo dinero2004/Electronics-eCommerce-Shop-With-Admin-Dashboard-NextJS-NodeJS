@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    output: 'standalone',
     outputFileTracingRoot: process.cwd(),
     images: {
         remotePatterns: [
@@ -28,8 +29,19 @@ const nextConfig = {
             },
             {
               key: 'X-XSS-Protection',
-              value: '1; mode=block',
+              value: '0',
             },
+            {
+              key: 'Referrer-Policy',
+              value: 'strict-origin-when-cross-origin',
+            },
+            {
+              key: 'Permissions-Policy',
+              value: 'camera=(), microphone=(), geolocation=()',
+            },
+            ...(process.env.NODE_ENV === 'production'
+              ? [{ key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' }]
+              : []),
           ],
         },
       ];

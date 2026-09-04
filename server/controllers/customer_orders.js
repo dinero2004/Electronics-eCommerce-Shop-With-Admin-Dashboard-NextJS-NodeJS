@@ -18,7 +18,12 @@ async function createCustomerOrder(request, response) {
     }
 
     // Server-side validation
-    const validation = validateOrderData(request.body);
+    const orderInput = {
+      ...request.body,
+      email: request.user.email,
+      status: "pending",
+    };
+    const validation = validateOrderData(orderInput);
     console.log("Validation result:", validation);
     
     if (!validation.isValid) {
@@ -37,7 +42,7 @@ async function createCustomerOrder(request, response) {
       console.log("❌ Invalid total amount");
       return response.status(400).json({
         error: "Invalid order total",
-        details: [{ field: 'total', message: 'Order total must be at least $0.01' }]
+        details: [{ field: 'total', message: 'Order total must be at least CHF 0.01' }]
       });
     }
 
@@ -90,15 +95,15 @@ async function createCustomerOrder(request, response) {
       let user = null;
       
       // First, try to use userId if provided (from logged-in user)
-      if (request.body.userId) {
-        console.log(`🔍 Using provided userId: ${request.body.userId}`);
+      if (request.user.id) {
+        console.log(`🔍 Using authenticated userId: ${request.user.id}`);
         user = await prisma.user.findUnique({
-          where: { id: request.body.userId }
+          where: { id: request.user.id }
         });
         if (user) {
           console.log(`✅ Found user by ID: ${user.email}`);
         } else {
-          console.log(`❌ User not found with ID: ${request.body.userId}`);
+          console.log(`❌ User not found with ID: ${request.user.id}`);
         }
       }
       
@@ -130,7 +135,7 @@ async function createCustomerOrder(request, response) {
     }
 
     // Log successful order creation (for monitoring)
-    console.log(`Order created successfully: ID ${corder.id}, Email: ${validatedData.email}, Total: $${validatedData.total}`);
+    console.log(`Order created successfully: ID ${corder.id}, Email: ${validatedData.email}, Total: CHF ${validatedData.total}`);
 
     const responseData = {
       id: corder.id,

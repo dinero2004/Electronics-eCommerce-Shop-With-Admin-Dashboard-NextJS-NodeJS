@@ -10,6 +10,9 @@ const {
     getAllUsers, 
     getUserByEmail
   } = require('../controllers/users');
+const { requireAdmin } = require('../middleware/auth');
+
+router.use(requireAdmin);
 
   router.route('/')
   .get(getAllUsers)

@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import apiClient from "@/lib/api";
 
 const CheckoutPage = () => {
-  const { data: session } = useSession();
+  const { data: session, status: sessionStatus } = useSession();
   const [checkoutForm, setCheckoutForm] = useState({
     name: "",
     lastname: "",
@@ -25,7 +25,7 @@ const CheckoutPage = () => {
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { products, total, clearCart } = useProductStore();
+  const { products, total } = useProductStore();
   const router = useRouter();
 
   // Add validation functions that match server requirements
@@ -88,6 +88,12 @@ const CheckoutPage = () => {
   };
 
   const makePurchase = async () => {
+    if (sessionStatus !== "authenticated" || !session?.user?.email) {
+      toast.error("Please sign in before checking out");
+      router.push("/login?callbackUrl=/checkout");
+      return;
+    }
+
     // Client-side validation first
     const validationErrors = validateForm();
     if (validationErrors.length > 0) {
@@ -125,32 +131,11 @@ const CheckoutPage = () => {
     setIsSubmitting(true);
 
     try {
-      console.log("🚀 Starting order creation...");
-      
-      // Get user ID if logged in
-      let userId = null;
-      if (session?.user?.email) {
-        try {
-          console.log("🔍 Getting user ID for logged-in user:", session.user.email);
-          const userResponse = await apiClient.get(`/api/users/email/${session.user.email}`);
-          if (userResponse.ok) {
-            const userData = await userResponse.json();
-            userId = userData.id;
-            console.log("✅ Found user ID:", userId);
-          } else {
-            console.log("❌ Could not find user with email:", session.user.email);
-          }
-        } catch (userError) {
-          console.log("⚠️  Error getting user ID:", userError);
-        }
-      }
-      
-      // Prepare the order data
       const orderData = {
         name: checkoutForm.name.trim(),
         lastname: checkoutForm.lastname.trim(),
         phone: checkoutForm.phone.trim(),
-        email: checkoutForm.email.trim().toLowerCase(),
+        email: session.user.email,
         company: checkoutForm.company.trim(),
         adress: checkoutForm.adress.trim(),
         apartment: checkoutForm.apartment.trim(),
@@ -160,137 +145,67 @@ const CheckoutPage = () => {
         city: checkoutForm.city.trim(),
         country: checkoutForm.country.trim(),
         orderNotice: checkoutForm.orderNotice.trim(),
-        userId: userId // Add user ID for notifications
       };
 
-      console.log("📋 Order data being sent:", orderData);
-
-      // Send order data to server for validation and processing
       const response = await apiClient.post("/api/orders", orderData);
-
-      console.log("📡 API Response received:");
-      console.log("  Status:", response.status);
-      console.log("  Status Text:", response.statusText);
-      console.log("  Response OK:", response.ok);
-      
-      // Check if response is ok before parsing
       if (!response.ok) {
-        console.error("❌ Response not OK:", response.status, response.statusText);
         const errorText = await response.text();
-        console.error("Error response body:", errorText);
-        
-        // Try to parse as JSON to get detailed error info
         try {
           const errorData = JSON.parse(errorText);
-          console.error("Parsed error data:", errorData);
-          
-          // Handle different error types
           if (response.status === 409) {
-            // Duplicate order error
             toast.error(errorData.details || errorData.error || "Duplicate order detected");
-            return; // Don't throw, just return to stop execution
+            return;
           } else if (errorData.details && Array.isArray(errorData.details)) {
-            // Validation errors
             errorData.details.forEach((detail: any) => {
               toast.error(`${detail.field}: ${detail.message}`);
             });
           } else if (typeof errorData.details === 'string') {
-            // Single error message in details
             toast.error(errorData.details);
           } else {
-            // Fallback error message
             toast.error(errorData.error || "Order creation failed");
           }
-        } catch (parseError) {
-          console.error("Could not parse error as JSON:", parseError);
+        } catch {
           toast.error("Order creation failed. Please try again.");
         }
-        
-        return; // Stop execution instead of throwing
+        return;
       }
 
       const data = await response.json();
-      console.log("✅ Parsed response data:", data);
-      
       const orderId: string = data.id;
-      console.log("🆔 Extracted order ID:", orderId);
+      if (!orderId) throw new Error("Order ID not received from server");
 
-      if (!orderId) {
-        console.error("❌ Order ID is missing or falsy!");
-        console.error("Full response data:", JSON.stringify(data, null, 2));
-        throw new Error("Order ID not received from server");
-      }
-
-      console.log("✅ Order ID validation passed, proceeding with product addition...");
-
-      // Add products to order
       for (let i = 0; i < products.length; i++) {
-        console.log(`🛍️ Adding product ${i + 1}/${products.length}:`, {
-          orderId,
-          productId: products[i].id,
-          quantity: products[i].amount
-        });
-        
         await addOrderProduct(orderId, products[i].id, products[i].amount);
-        console.log(`✅ Product ${i + 1} added successfully`);
       }
 
-      console.log(" All products added successfully!");
-
-      // Clear form and cart
-      setCheckoutForm({
-        name: "",
-        lastname: "",
-        phone: "",
-        email: "",
-        company: "",
-        adress: "",
-        apartment: "",
-        city: "",
-        country: "",
-        postalCode: "",
-        orderNotice: "",
-      });
-      clearCart();
-      
-      // Refresh notification count if user is logged in
-      try {
-        // This will trigger a refresh of notifications in the background
-        window.dispatchEvent(new CustomEvent('orderCompleted'));
-      } catch (error) {
-        console.log('Note: Could not trigger notification refresh');
+      const paymentResponse = await apiClient.post("/api/payments/checkout-session", { orderId });
+      if (!paymentResponse.ok) {
+        const paymentError = await paymentResponse.json().catch(() => ({}));
+        throw new Error(paymentError.error || "Could not start secure payment");
       }
-      
-      toast.success("Order created successfully! You will be contacted for payment.");
-      setTimeout(() => {
-        router.push("/");
-      }, 1000);
+      const payment = await paymentResponse.json();
+      if (!payment.url) throw new Error("Payment provider did not return a checkout URL");
+
+      toast.success(payment.mode === "mock" ? "Local test payment approved" : "Opening secure Stripe Checkout");
+      window.location.assign(payment.url);
     } catch (error: any) {
-      console.error("💥 Error in makePurchase:", error);
-      
-      // Handle server validation errors
       if (error.response?.status === 400) {
-        console.log(" Handling 400 error...");
         try {
           const errorData = await error.response.json();
-          console.log("Error data:", errorData);
           if (errorData.details && Array.isArray(errorData.details)) {
-            // Show specific validation errors
             errorData.details.forEach((detail: any) => {
               toast.error(`${detail.field}: ${detail.message}`);
             });
           } else {
             toast.error(errorData.error || "Validation failed");
           }
-        } catch (parseError) {
-          console.error("Failed to parse error response:", parseError);
+        } catch {
           toast.error("Validation failed");
         }
       } else if (error.response?.status === 409) {
         toast.error("Duplicate order detected. Please wait before creating another order.");
       } else {
-        console.log("🔍 Handling generic error...");
-        toast.error("Failed to create order. Please try again.");
+        toast.error(error?.message || "Failed to create order. Please try again.");
       }
     } finally {
       setIsSubmitting(false);
@@ -302,33 +217,13 @@ const CheckoutPage = () => {
     productId: string,
     productQuantity: number
   ) => {
-    try {
-      console.log("️ Adding product to order:", {
-        customerOrderId: orderId,
-        productId,
-        quantity: productQuantity
-      });
-      
-      const response = await apiClient.post("/api/order-product", {
-        customerOrderId: orderId,
-        productId: productId,
-        quantity: productQuantity,
-      });
-
-      console.log("📡 Product order response:", response);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("❌ Product order failed:", response.status, errorText);
-        throw new Error(`Product order failed: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log("✅ Product order successful:", data);
-      
-    } catch (error) {
-      console.error("💥 Error creating product order:", error);
-      throw error;
+    const response = await apiClient.post("/api/order-product", {
+      customerOrderId: orderId,
+      productId,
+      quantity: productQuantity,
+    });
+    if (!response.ok) {
+      throw new Error(`Product order failed: ${response.status}`);
     }
   };
 
@@ -337,7 +232,20 @@ const CheckoutPage = () => {
       toast.error("You don't have items in your cart");
       router.push("/cart");
     }
-  }, []);
+  }, [products.length, router]);
+
+  useEffect(() => {
+    if (sessionStatus === "unauthenticated") {
+      toast.error("Please sign in before checking out");
+      router.push("/login?callbackUrl=/checkout");
+    }
+  }, [router, sessionStatus]);
+
+  useEffect(() => {
+    if (session?.user?.email && !checkoutForm.email) {
+      setCheckoutForm((current) => ({ ...current, email: session.user.email || "" }));
+    }
+  }, [checkoutForm.email, session?.user?.email]);
 
   return (
     <div className="bg-white">
@@ -377,7 +285,7 @@ const CheckoutPage = () => {
                     <p className="text-gray-500">x{product?.amount}</p>
                   </div>
                   <p className="flex-none text-base font-medium">
-                    ${product?.price}
+                    CHF {product?.price}
                   </p>
                 </li>
               ))}
@@ -386,20 +294,20 @@ const CheckoutPage = () => {
             <dl className="hidden space-y-6 border-t border-gray-200 pt-6 text-sm font-medium text-gray-900 lg:block">
               <div className="flex items-center justify-between">
                 <dt className="text-gray-600">Subtotal</dt>
-                <dd>${total}</dd>
+                <dd>CHF {total}</dd>
               </div>
               <div className="flex items-center justify-between">
                 <dt className="text-gray-600">Shipping</dt>
-                <dd>$5</dd>
+                <dd>CHF 5</dd>
               </div>
               <div className="flex items-center justify-between">
                 <dt className="text-gray-600">Taxes</dt>
-                <dd>${total / 5}</dd>
+                <dd>CHF {Math.round(total / 5)}</dd>
               </div>
               <div className="flex items-center justify-between border-t border-gray-200 pt-6">
                 <dt className="text-base">Total</dt>
                 <dd className="text-base">
-                  ${total === 0 ? 0 : Math.round(total + total / 5 + 5)}
+                  CHF {total === 0 ? 0 : Math.round(total + total / 5 + 5)}
                 </dd>
               </div>
             </dl>
@@ -537,10 +445,10 @@ const CheckoutPage = () => {
                   </div>
                   <div className="ml-3">
                     <h3 className="text-sm font-medium text-blue-800">
-                      Payment Information
+                      Secure payment
                     </h3>
                     <div className="mt-2 text-sm text-blue-700">
-                      <p>Payment will be processed after order confirmation. You will be contacted for payment details.</p>
+                      <p>Continue to Stripe Sandbox for TWINT, Visa, Mastercard, Apple Pay, or Google Pay. Test payments never create a real charge.</p>
                     </div>
                   </div>
                 </div>
@@ -748,10 +656,10 @@ const CheckoutPage = () => {
               <button
                 type="button"
                 onClick={makePurchase}
-                disabled={isSubmitting}
+                disabled={isSubmitting || sessionStatus !== "authenticated"}
                 className="w-full rounded-md border border-transparent bg-blue-500 px-20 py-2 text-lg font-medium text-white shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 focus:ring-offset-gray-50 sm:order-last disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? "Processing Order..." : "Place Order"}
+                {isSubmitting ? "Opening secure payment..." : "Continue to secure payment"}
               </button>
             </div>
           </div>

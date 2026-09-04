@@ -13,8 +13,8 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: {
-    default: "My First Shop",
-    template: "%s | My First Shop",
+    default: "Online Shop",
+    template: "%s | Online Shop",
   },
   description: "A complete starter shop for discovering and buying electronics online.",
 };

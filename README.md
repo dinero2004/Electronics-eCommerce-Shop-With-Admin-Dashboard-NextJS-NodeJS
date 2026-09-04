@@ -21,6 +21,50 @@ Open [http://localhost:3000](http://localhost:3000). The API health endpoint is 
 
 > Change all example credentials and secrets before deploying this project publicly.
 
+## Docker Compose (recommended)
+
+Docker starts the storefront, API, and MySQL together and seeds the demo catalog idempotently:
+
+```bash
+cp .env.local.example .env.local
+docker compose --env-file .env.local up --build
+```
+
+Open [http://localhost:3000](http://localhost:3000). MySQL is exposed on port `3307` so it does not conflict with a local MySQL service. Stop the stack with `docker compose down`; add `-v` only when you intentionally want to delete the Docker database volume.
+
+## Payments
+
+Local development defaults to `PAYMENTS_MODE=mock` together with the explicit `ALLOW_MOCK_PAYMENTS=true` safeguard. The mock exercises order creation, authenticated checkout, server-side price calculation, and payment-state updates without moving money.
+
+For Stripe test mode, set the following in both local environments or in your deployment secret manager:
+
+```bash
+PAYMENTS_MODE=stripe
+ALLOW_MOCK_PAYMENTS=false
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+```
+
+Forward Stripe events locally with `stripe listen --forward-to localhost:3001/api/payments/webhook`. Checkout supports cards and TWINT in CHF. Apple Pay and Google Pay are exposed by Stripe through the card payment method when they are enabled for the account and available on the customer's device. Never place Stripe secret keys in `NEXT_PUBLIC_*` variables.
+
+## Automated tests
+
+```bash
+npm --prefix server test
+npx playwright install chromium
+npm run test:e2e
+npm run build
+```
+
+The Supertest suite checks health, authentication boundaries, mock payment state, and webhook rejection. The Playwright suite covers registration, login, product selection, cart, checkout, and payment success. GitHub Actions runs database setup, API tests, the production build, and the browser journey on every push and pull request.
+
+## Production checklist
+
+- Use long, unique `NEXTAUTH_SECRET`, database, and Stripe secrets from a secret manager.
+- Set `NEXTAUTH_URL`, `FRONTEND_URL`, and API URLs to HTTPS origins; keep CORS restricted to those exact origins.
+- Disable mock payments, configure the Stripe webhook endpoint, and register the production domain for wallet payments.
+- Run the CI workflow before deployment and keep the database backed up.
+
 <h2>Original project: Electronics eCommerce Shop With Admin Dashboard in Next.js and Node.js</h2>
 
 <p><b>Electronics eCommerce shop with admin dashboard in Next.js and Node.js</b> is a <b>free eCommerce store</b> developed using Next.js, Node.js and MySQL. The application is completely built from scratch(custom design) and completely responsive.
@@ -149,7 +193,7 @@ We have applied this method by examining the code after each new added functiona
 NEXT_PUBLIC_API_BASE_URL=http://localhost:3001
 NODE_ENV=development
 DATABASE_URL="mysql://username:password@localhost:3306/singitronic_nextjs?sslmode=disabled"
-NEXTAUTH_SECRET=12D16C923BA17672F89B18C1DB22A
+NEXTAUTH_SECRET=replace-with-a-long-random-secret
 NEXTAUTH_URL=http://localhost:3000
 ```
 

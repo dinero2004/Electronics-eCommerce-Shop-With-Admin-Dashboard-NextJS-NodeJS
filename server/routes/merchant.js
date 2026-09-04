@@ -7,6 +7,7 @@ const {
   updateMerchant,
   deleteMerchant,
 } = require("../controllers/merchant");
+const { requireAdmin } = require("../middleware/auth");
 
 // Get all merchants
 router.get("/", getAllMerchants);
@@ -15,12 +16,12 @@ router.get("/", getAllMerchants);
 router.get("/:id", getMerchantById);
 
 // Create a new merchant
-router.post("/", createMerchant);
+router.post("/", requireAdmin, createMerchant);
 
 // Update a merchant
-router.put("/:id", updateMerchant);
+router.put("/:id", requireAdmin, updateMerchant);
 
 // Delete a merchant
-router.delete("/:id", deleteMerchant);
+router.delete("/:id", requireAdmin, deleteMerchant);
 
 module.exports = router;

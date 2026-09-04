@@ -9,15 +9,14 @@ const {
     deleteCustomerOrder,
     getAllOrders 
   } = require('../controllers/customer_orders');
+const { requireUser, requireAdmin } = require('../middleware/auth');
 
-  router.route('/')
-  .get(getAllOrders)
-  .post(createCustomerOrder);
+  router.get('/', requireAdmin, getAllOrders);
+  router.post('/', requireUser, createCustomerOrder);
 
-  router.route('/:id')
-  .get(getCustomerOrder)
-  .put(updateCustomerOrder) 
-  .delete(deleteCustomerOrder); 
+  router.get('/:id', requireAdmin, getCustomerOrder);
+  router.put('/:id', requireAdmin, updateCustomerOrder);
+  router.delete('/:id', requireAdmin, deleteCustomerOrder);
 
 
   module.exports = router;

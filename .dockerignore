@@ -1,0 +1,13 @@
+.git
+.github
+.next
+node_modules
+server/node_modules
+.env
+.env.local
+server/.env
+server/.env.local
+server/logs
+test-results
+playwright-report
+npm-debug.log*

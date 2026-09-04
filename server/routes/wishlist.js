@@ -9,10 +9,13 @@ const {
   deleteWishItem,
   getSingleProductFromWishlist
 } = require("../controllers/wishlist");
+const { requireUser, requireAdmin, requireSelfParam, requireSelfBody } = require("../middleware/auth");
 
-router.route("/").get(getAllWishlist).post(createWishItem);
+router.get("/", requireAdmin, getAllWishlist);
+router.post("/", requireUser, requireSelfBody("userId"), createWishItem);
 
-router.route("/:userId").get(getAllWishlistByUserId);
-router.route("/:userId/:productId").get(getSingleProductFromWishlist).delete(deleteWishItem);
+router.get("/:userId", requireUser, requireSelfParam("userId"), getAllWishlistByUserId);
+router.get("/:userId/:productId", requireUser, requireSelfParam("userId"), getSingleProductFromWishlist);
+router.delete("/:userId/:productId", requireUser, requireSelfParam("userId"), deleteWishItem);
 
 module.exports = router;

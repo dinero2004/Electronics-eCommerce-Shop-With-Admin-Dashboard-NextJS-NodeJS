@@ -32,17 +32,8 @@ export const useNotifications = () => {
 
   // Get current user ID
   const getCurrentUserId = useCallback(async () => {
-    if (!session?.user?.email) return null;
-    
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/email/${session.user.email}`);
-      const userData = await response.json();
-      return userData?.id || null;
-    } catch (error) {
-      console.error('Error fetching user ID:', error);
-      return null;
-    }
-  }, [session?.user?.email]);
+    return session?.user?.id || null;
+  }, [session?.user?.id]);
 
   // Fetch notifications
   const fetchNotifications = useCallback(async (customFilters?: NotificationFilters) => {
@@ -209,21 +200,15 @@ export const useUnreadCount = () => {
   const { data: session } = useSession();
 
   const fetchUnreadCount = useCallback(async () => {
-    if (!session?.user?.email) return;
+    if (!session?.user?.id) return;
 
     try {
-      // Get user ID first
-      const userResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/email/${session.user.email}`);
-      const userData = await userResponse.json();
-      
-      if (userData?.id) {
-        const { unreadCount } = await notificationApi.getUnreadCount(userData.id);
-        setUnreadCount(unreadCount);
-      }
+      const { unreadCount } = await notificationApi.getUnreadCount(session.user.id);
+      setUnreadCount(unreadCount);
     } catch (error) {
       console.error('Error fetching unread count:', error);
     }
-  }, [session?.user?.email, setUnreadCount]);
+  }, [session?.user?.id, setUnreadCount]);
 
   // Auto-refresh unread count every 30 seconds
   useEffect(() => {

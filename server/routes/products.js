@@ -9,14 +9,15 @@ const {
   searchProducts,
   getProductById,
 } = require("../controllers/products");
+const { requireAdmin } = require("../middleware/auth");
 
-router.route("/").get(getAllProducts).post(createProduct);
+router.route("/").get(getAllProducts).post(requireAdmin, createProduct);
 
 
 router
   .route("/:id")
   .get(getProductById)
-  .put(updateProduct)
-  .delete(deleteProduct);
+  .put(requireAdmin, updateProduct)
+  .delete(requireAdmin, deleteProduct);
 
 module.exports = router;

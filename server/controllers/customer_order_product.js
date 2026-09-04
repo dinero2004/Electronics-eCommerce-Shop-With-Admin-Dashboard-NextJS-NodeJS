@@ -25,6 +25,10 @@ const createOrderProduct = asyncHandler(async (request, response) => {
     throw new AppError("Customer order not found", 404);
   }
 
+  if (request.user.role !== "admin" && existingOrder.email !== request.user.email) {
+    throw new AppError("This order does not belong to your account", 403);
+  }
+
   // Verify that the product exists
   const existingProduct = await prisma.product.findUnique({
     where: { id: productId }
@@ -41,6 +45,19 @@ const createOrderProduct = asyncHandler(async (request, response) => {
       productId: productId,
       quantity: parseInt(quantity)
     }
+  });
+
+  const verifiedItems = await prisma.customer_order_product.findMany({
+    where: { customerOrderId },
+    include: { product: { select: { price: true } } }
+  });
+  const verifiedSubtotal = verifiedItems.reduce(
+    (sum, item) => sum + item.product.price * item.quantity,
+    0
+  );
+  await prisma.customer_order.update({
+    where: { id: customerOrderId },
+    data: { total: verifiedSubtotal }
   });
 
   return response.status(201).json(orderProduct);

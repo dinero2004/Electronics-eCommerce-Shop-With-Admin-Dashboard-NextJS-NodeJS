@@ -8,6 +8,9 @@ const {
   updateBatchItems,
   deleteBatch,
 } = require("../controllers/bulkUpload");
+const { requireAdmin } = require("../middleware/auth");
+
+router.use(requireAdmin);
 
 router.route("/")
   .post(uploadCsvAndCreateBatch)

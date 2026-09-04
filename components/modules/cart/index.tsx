@@ -62,7 +62,7 @@ export const CartModule = () => {
                         ) : null}
                       </div> */}
                     <p className="mt-1 text-sm font-medium text-gray-900">
-                      ${product.price}
+                      CHF {product.price}
                     </p>
                   </div>
 
@@ -118,7 +118,7 @@ export const CartModule = () => {
           <div className="flex items-center justify-between">
             <dt className="text-sm text-gray-600">Subtotal</dt>
             <dd className="text-sm font-medium text-gray-900">
-              ${total}
+              CHF {total}
             </dd>
           </div>
           <div className="flex items-center justify-between border-t border-gray-200 pt-4">
@@ -137,7 +137,7 @@ export const CartModule = () => {
                 />
               </a>
             </dt>
-            <dd className="text-sm font-medium text-gray-900">$5.00</dd>
+            <dd className="text-sm font-medium text-gray-900">CHF 5.00</dd>
           </div>
           <div className="flex items-center justify-between border-t border-gray-200 pt-4">
             <dt className="flex text-sm text-gray-600">
@@ -156,7 +156,7 @@ export const CartModule = () => {
               </a>
             </dt>
             <dd className="text-sm font-medium text-gray-900">
-              ${total / 5}
+              CHF {Math.round(total / 5)}
             </dd>
           </div>
           <div className="flex items-center justify-between border-t border-gray-200 pt-4">
@@ -164,7 +164,7 @@ export const CartModule = () => {
               Order total
             </dt>
             <dd className="text-base font-medium text-gray-900">
-              ${total === 0 ? 0 : Math.round(total + total / 5 + 5)}
+              CHF {total === 0 ? 0 : Math.round(total + total / 5 + 5)}
             </dd>
           </div>
         </dl>

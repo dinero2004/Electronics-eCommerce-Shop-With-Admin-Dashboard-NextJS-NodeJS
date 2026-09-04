@@ -33,13 +33,13 @@ interface NotificationCardProps {
 const getTypeIcon = (type: NotificationType) => {
   switch (type) {
     case NotificationType.ORDER_UPDATE:
-      return <FaShoppingCart className="text-blue-500" />;
+      return <FaShoppingCart className="text-[#8eb1c7]" />;
     case NotificationType.PAYMENT_STATUS:
-      return <FaCreditCard className="text-green-500" />;
+      return <FaCreditCard className="text-[#44af69]" />;
     case NotificationType.PROMOTION:
-      return <FaTag className="text-purple-500" />;
+      return <FaTag className="text-[#bc9ec1]" />;
     case NotificationType.SYSTEM_ALERT:
-      return <FaExclamationTriangle className="text-red-500" />;
+      return <FaExclamationTriangle className="text-[#f8333c]" />;
     default:
       return <FaCircle className="text-gray-500" />;
   }
@@ -89,13 +89,13 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
   onMarkAsRead,
   onDelete
 }) => {
-    const timeAgo = formatTimeAgo(notification.createdAt);
+  const timeAgo = formatTimeAgo(notification.createdAt);
 
   return (
     <div className={`
       border rounded-lg p-4 transition-all duration-200 hover:shadow-md
-      ${notification.isRead ? 'bg-white border-gray-200' : 'bg-blue-50 border-blue-200 shadow-sm'}
-      ${isSelected ? 'ring-2 ring-blue-500 border-blue-500' : ''}
+      ${notification.isRead ? 'bg-[#FFFFFF] border-gray-200' : 'bg-[#FF570A]/5 border-[#FF570A]/30 shadow-sm'}
+      ${isSelected ? 'ring-2 ring-[#FF570A] border-[#FF570A]' : ''}
     `}>
       <div className="flex items-start space-x-3">
         {/* Selection Checkbox */}
@@ -104,7 +104,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
             type="checkbox"
             checked={isSelected}
             onChange={() => onToggleSelect(notification.id)}
-            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+            className="w-4 h-4 text-[#FF570A] bg-gray-100 border-gray-300 rounded focus:ring-[#FF570A] focus:ring-2"
             aria-label={`Select notification: ${notification.title}`}
           />
         </div>
@@ -117,13 +117,13 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
               <div className="flex-shrink-0">
                 {getTypeIcon(notification.type)}
               </div>
-              <h3 className={`text-sm font-medium truncate ${
-                notification.isRead ? 'text-gray-900' : 'text-gray-900 font-semibold'
+              <h3 className={`text-sm truncate ${
+                notification.isRead ? 'text-[#420039]/80 font-medium' : 'text-[#420039] font-bold'
               }`}>
                 {notification.title}
               </h3>
               {!notification.isRead && (
-                <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" aria-label="Unread notification" />
+                <div className="w-2 h-2 bg-[#FF570A] rounded-full flex-shrink-0" aria-label="Unread notification" />
               )}
             </div>
 
@@ -134,7 +134,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
           </div>
 
           {/* Message */}
-          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+          <p className="text-sm text-[#420039]/70 mb-3 line-clamp-2">
             {notification.message}
           </p>
 
@@ -147,7 +147,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
               </span>
               
               {/* Timestamp */}
-              <span className="text-xs text-gray-500" title={new Date(notification.createdAt).toLocaleString()}>
+              <span className="text-xs text-[#420039]/50" title={new Date(notification.createdAt).toLocaleString()}>
                 {timeAgo}
               </span>
             </div>
@@ -157,7 +157,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
               {!notification.isRead && (
                 <button
                   onClick={() => onMarkAsRead(notification.id)}
-                  className="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 transition-colors"
+                  className="inline-flex items-center px-2 py-1 text-xs font-medium text-[#FF570A] bg-[#FF570A]/10 rounded hover:bg-[#FF570A]/20 focus:outline-none focus:ring-2 focus:ring-[#FF570A] focus:ring-offset-1 transition-colors"
                   aria-label="Mark as read"
                 >
                   <FaCheck className="w-3 h-3 mr-1" />
@@ -167,7 +167,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
               
               <button
                 onClick={() => onDelete(notification.id)}
-                className="inline-flex items-center px-2 py-1 text-xs font-medium text-red-600 bg-red-100 rounded hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 transition-colors"
+                className="inline-flex items-center px-2 py-1 text-xs font-medium text-[#D72638] bg-[#D72638]/10 rounded hover:bg-[#D72638]/20 focus:outline-none focus:ring-2 focus:ring-[#D72638] focus:ring-offset-1 transition-colors"
                 aria-label="Delete notification"
               >
                 <FaTrash className="w-3 h-3 mr-1" />
@@ -180,5 +180,6 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
     </div>
   );
 };
+
 
 export default NotificationCard;

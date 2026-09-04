@@ -47,7 +47,7 @@ const Filters = () => {
     params.set("sort", sortBy);
     params.set("page", page.toString());
     replace(`${pathname}?${params}`);
-  }, [inputCategory, sortBy, page]);
+  }, [inputCategory, sortBy, page, pathname, replace]);
 
   return (
     <div>
@@ -119,7 +119,7 @@ const Filters = () => {
               })
             }
           />
-          <span>{`Max price: $${inputCategory.priceFilter.value}`}</span>
+          <span>{`Max price: CHF ${inputCategory.priceFilter.value}`}</span>
         </div>
       </div>
 

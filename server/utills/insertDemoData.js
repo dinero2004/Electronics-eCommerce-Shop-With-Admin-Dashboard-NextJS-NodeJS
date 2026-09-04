@@ -241,22 +241,31 @@ const demoCategories = [
 async function insertDemoData() {
 
   for (const merchant of demoMerchant) {
-    await prisma.merchant.create({
-      data: merchant,
+    const { id, ...data } = merchant;
+    await prisma.merchant.upsert({
+      where: { id },
+      update: data,
+      create: { id, ...data },
     });
   }
   console.log("Demo merchant inserted successfully!");
 
   for (const category of demoCategories) {
-    await prisma.category.create({
-      data: category,
+    const { id, ...data } = category;
+    await prisma.category.upsert({
+      where: { id },
+      update: data,
+      create: { id, ...data },
     });
   }
   console.log("Demo categories inserted successfully!");
 
   for (const product of demoProducts) {
-    await prisma.product.create({
-      data: product,
+    const { id, ...data } = product;
+    await prisma.product.upsert({
+      where: { id },
+      update: data,
+      create: { id, ...data },
     });
   }
   console.log("Demo products inserted successfully!");

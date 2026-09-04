@@ -1,0 +1,6 @@
+node_modules
+.env
+.env.local
+logs
+tests
+npm-debug.log*

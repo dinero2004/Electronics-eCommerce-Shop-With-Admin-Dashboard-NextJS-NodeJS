@@ -67,6 +67,8 @@ model Customer_order {
   country     String
   orderNotice String?
   total       Int
+  paymentStatus  String  @default("unpaid")
+  stripeSessionId String? @unique
   products    customer_order_product[]
 }
 

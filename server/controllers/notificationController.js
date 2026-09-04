@@ -137,6 +137,14 @@ const updateNotification = async (req, res) => {
       return res.status(400).json({ error: 'isRead must be a boolean value' });
     }
 
+    const existing = await prisma.notification.findFirst({
+      where: {
+        id,
+        ...(req.user.role === 'admin' ? {} : { userId: req.user.id })
+      }
+    });
+    if (!existing) return res.status(404).json({ error: 'Notification not found' });
+
     const notification = await prisma.notification.update({
       where: { id },
       data: { isRead }
